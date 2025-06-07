@@ -1,0 +1,97 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Articles{% endblock %}
+
+{% block content %}
+<h1>Articles</h1>
+
+{% if user.is_authenticated %}
+<form id="article-form" class="mb-4">
+    <div class="mb-3">
+        {{ form.title.label_tag }}
+        {{ form.title }}
+    </div>
+    <div class="mb-3">
+        {{ form.content.label_tag }}
+        {{ form.content }}
+    </div>
+    <div class="mb-3">
+        {{ form.category.label_tag }}
+        {{ form.category }}
+    </div>
+    <button type="submit" class="btn btn-primary">Add Article</button>
+</form>
+{% else %}
+<p><a href="/admin/login/?next=/">Login to add articles</a></p>
+{% endif %}
+
+<div id="article-list">
+    {% for article in articles %}
+    <div class="card mb-3" id="article-{{ article.id }}">
+        <div class="card-body">
+            <h5 class="card-title">{{ article.title }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">by {{ article.author.username }} on {{ article.created_at|date:"Y-m-d H:i" }}</h6>
+            {% if article.category %}
+            <p class="text-muted">分类：{{ article.category.name }}</p>
+            {% endif %}
+            <p class="card-text" data-article-content>{{ article.content_as_html|safe }}</p>
+            {% if user == article.author %}
+            <button class="btn btn-sm btn-secondary edit-article" data-id="{{ article.id }}" data-markdown="{{ article.content|escape }}">Edit</button>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+$(function() {
+  $('#article-form').on('submit', function(e) {
+    e.preventDefault();
+    $.ajax({
+      url: '{% url "blog:add_article" %}',
+      type: 'POST',
+      data: $(this).serialize(),
+      success: function(data) {
+        $('#article-list').prepend(`
+          <div class="card mb-3" id="article-${data.id}">
+            <div class="card-body">
+              <h5 class="card-title">${data.title}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">by ${data.author} on ${data.created_at}</h6>
+              ${data.category ? `<p class="text-muted">分类：${data.category}</p>` : ''}
+              <p class="card-text" data-article-content>${data.content}</p>
+              <button class="btn btn-sm btn-secondary edit-article" data-id="${data.id}" data-markdown="${data.markdown.replace(/"/g, '&quot;')}">Edit</button>
+            </div>
+          </div>
+        `);
+        $('#article-form')[0].reset();
+      }
+    });
+  });
+
+  $('#article-list').on('click', '.edit-article', function() {
+    var articleId = $(this).data('id');
+    var card = $('#article-' + articleId);
+    var contentEl = card.find('[data-article-content]');
+    var originalContent = $(this).data('markdown');
+    var textarea = $('<textarea class="form-control mb-2">').val(originalContent);
+    var saveBtn = $('<button class="btn btn-primary btn-sm mb-2">Save</button>');
+    contentEl.replaceWith(textarea);
+    $(this).after(saveBtn).remove();
+    saveBtn.on('click', function() {
+      $.ajax({
+        url: `/` + articleId + '/edit/',
+        type: 'POST',
+        data: {
+          'title': card.find('.card-title').text(),
+          'content': textarea.val()
+        },
+        success: function(data) {
+          textarea.replaceWith('<p class="card-text" data-article-content>' + data.content + '</p>');
+          saveBtn.replaceWith('<button class="btn btn-sm btn-secondary edit-article" data-id="' + data.id + '" data-markdown="' + textarea.val().replace(/"/g, '&quot;') + '">Edit</button>');
+        }
+      });
+    });
+  });
+});
+</script>
+{% endblock %}
