@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # 引入 SimpleUI，让后台界面更美观
     "simpleui",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -117,6 +118,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+# 额外的静态文件目录
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Default primary key field type

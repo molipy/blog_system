@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+# 应用的 URL 路由配置
+
 app_name = "blog"
 urlpatterns = [
     path('', views.article_list, name='article_list'),

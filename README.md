@@ -2,6 +2,9 @@
 
 Simple personal blog built with Django.
 
+English instructions are provided below. For a Chinese version, see
+[README.zh.md](README.zh.md).
+
 ## Setup
 
 1. Install dependencies:

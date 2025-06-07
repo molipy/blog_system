@@ -1,3 +1,3 @@
 from django.test import TestCase
 
-# Create your tests here.
+# 这里留空方便日后添加单元测试

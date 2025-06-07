@@ -3,6 +3,8 @@
 import os
 import sys
 
+# 管理脚本入口，可执行如运行服务器、迁移数据库等命令
+
 
 def main():
     """Run administrative tasks."""

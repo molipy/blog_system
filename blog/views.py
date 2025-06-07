@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404, render
 from .forms import ArticleForm
 from .models import Article
 
+# 以下视图函数通过 AJAX 提供文章的增删改查操作
+
 # 视图函数，提供文章的增删改查接口
 
 

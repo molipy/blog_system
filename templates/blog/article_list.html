@@ -36,7 +36,11 @@
             {% endif %}
             <p class="card-text" data-article-content>{{ article.content_as_html|safe }}</p>
             {% if user == article.author %}
-            <button class="btn btn-sm btn-secondary edit-article" data-id="{{ article.id }}" data-markdown="{{ article.content|escape }}">Edit</button>
+            {# 编辑按钮上保存文章分类，便于 AJAX 更新时保持分类不变 #}
+            <button class="btn btn-sm btn-secondary edit-article"
+                    data-id="{{ article.id }}"
+                    data-category="{{ article.category.id|default_if_none:'' }}"
+                    data-markdown="{{ article.content|escape }}">Edit</button>
             {% endif %}
         </div>
     </div>
@@ -73,6 +77,8 @@ $(function() {
     var card = $('#article-' + articleId);
     var contentEl = card.find('[data-article-content]');
     var originalContent = $(this).data('markdown');
+    // 保存原有分类编号，编辑时一起提交
+    var categoryId = $(this).data('category');
     var textarea = $('<textarea class="form-control mb-2">').val(originalContent);
     var saveBtn = $('<button class="btn btn-primary btn-sm mb-2">Save</button>');
     contentEl.replaceWith(textarea);
@@ -83,11 +89,13 @@ $(function() {
         type: 'POST',
         data: {
           'title': card.find('.card-title').text(),
-          'content': textarea.val()
+          'content': textarea.val(),
+          // 将原有分类一并提交，防止被清空
+          'category': categoryId || ''
         },
         success: function(data) {
           textarea.replaceWith('<p class="card-text" data-article-content>' + data.content + '</p>');
-          saveBtn.replaceWith('<button class="btn btn-sm btn-secondary edit-article" data-id="' + data.id + '" data-markdown="' + textarea.val().replace(/"/g, '&quot;') + '">Edit</button>');
+          saveBtn.replaceWith('<button class="btn btn-sm btn-secondary edit-article" data-id="' + data.id + '" data-category="' + (categoryId || '') + '" data-markdown="' + textarea.val().replace(/"/g, '&quot;') + '">Edit</button>');
         }
       });
     });

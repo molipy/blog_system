@@ -18,6 +18,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+# 项目级 URL 路由入口，包含后台和博客应用
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("blog.urls")),
